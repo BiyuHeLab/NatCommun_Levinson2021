@@ -27,8 +27,8 @@
 2. Register the resulting clusters into each subject's anatomical space, to prepare for MVPA. Run Align/align_roi_to_anatomical then GLM/split_thalamus_bg.
 ### Multivariate pattern analysis
 1. Align searchlight-based decoding results to standard space using Align/align_mvpa_2standard.sh.
-2. In MATLAB, edit and run HLTP_groupMVPA_stats.m, HLTP_groupMVPA_stats_perm.m, and HLTP_groupMVPA_stats_perm_rec_unrec.m to perform statistics on searchlight analyses. To generate final statistical brain maps, threshold the group-averaged brain map by the output TFCE_T statistic. e.g.
+2. In MATLAB, edit and run MVPA_stats/HLTP_groupMVPA_stats.m, MVPA_stats/HLTP_groupMVPA_stats_perm.m, and MVPA_stats/HLTP_groupMVPA_stats_perm_rec_unrec.m to perform statistics on searchlight analyses. To generate final statistical brain maps, threshold the group-averaged brain map by the output TFCE_T statistic. e.g.
 ```
 fslmaths group_avg.nii -thr TFCE_critical_stat group_avg_thresholded.nii
 ```
-3. In MATLAB, edit and run HLTP_groupMVPA_stats_ROI.m to perform statistics on ROI-based analyses.
+3. In MATLAB, edit and run MVPA_stats/HLTP_groupMVPA_stats_ROI.m to perform statistics on ROI-based analyses.

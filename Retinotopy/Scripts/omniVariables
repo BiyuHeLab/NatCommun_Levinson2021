@@ -1,0 +1,39 @@
+#!/bin/tcsh
+
+set subj = 02
+set study = Biyu
+set participant = retinotopy
+set anat_T1 	= t1
+set anat_PD 	= pd
+set firstRun 	= prf  # the retinotopy run   
+set fwhm 	= 5 # smoothing kernel in mm
+
+	set runTypes 	= pRF # names of the run/series types...
+	set catTypes	= pRF
+	
+	set pRFCat = 001
+	set omniCat	= 001	 # line all the numbers, from above, up (all the functional runs, sorted in ascending manner)
+
+set pRF = 0001
+set Left = 0002
+set Right = 0003 # 4-digit
+
+
+# make sure these paths point to the right places
+set dataDir = # PATH TO MAIN DATA DIRECTORY
+set subDir = $dataDir/sub$subj
+set participantDir = $subDir/proc_data/func/prf
+set scriptsDir = $participantDir/Scripts
+set dicomDir = $participantDir/Dicom
+set origBRIKDir = $participantDir/Original
+set timeDir = $participantDir/TS
+set motionDir = $participantDir/MC
+set smoothDir = $participantDir/Smoothed
+set maskDir = $participantDir/Mask
+set detrendDir  = $participantDir/Detrend
+set alignDir = $participantDir/Align
+
+set timeExt = ts
+set motionExt = mc
+set detrendExt = detrend
+set smoothExt = sm_$fwhm

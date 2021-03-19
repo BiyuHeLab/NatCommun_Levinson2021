@@ -1,0 +1,85 @@
+#!/bin/sh
+## CONVERT STANDARD (MNI152) ROIS TO SUBJECT ANATOMICAL SPACE ##
+
+# Parameters
+scripts_dir= # PATH TO SCRIPTS DIRECTORY
+. $scripts_dir/directories # point to location of 'directories' file
+. $scripts_dir/analysis_parameters
+subjects="01 04 05 07 08 09 11 13 15 16 18 19 20 22 25 26 29 30 31 32 33 34 35 37 38"
+
+## HARVARD_OXFORD - align atlas ROIs to each subject's anatomical space.
+atlas_dir=$data_dir/Harvard_ROIs
+roi_names_file="roi_names.txt"
+rois="3 4 41 42 43 44 45 46 47 48 49 50 53 54 57 58 59 60 67 68 69 70 71 72 73 74 75 76 77 78 79 80 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111"
+
+for subj in $subjects; do
+    subj_dir=$data_dir/sub$subj
+    proc_dir=$subj_dir/proc_data
+    roi_dir=$proc_dir/anat/rois
+    atlas_roi_dir=$roi_dir/HarvardOxford
+    mkdir $roi_dir; mkdir $atlas_roi_dir
+    for r in $rois; do
+        roi_name=$(tail -n+${r} $atlas_dir/$roi_names_file | head -1)
+        flirt -in $atlas_dir/roi_${r} -ref $proc_dir/anat/divt1pd_brain_2mm -init $proc_dir/func/block1/block1_preproc.feat/reg/standard2highres.mat -out $atlas_roi_dir/$roi_name -applyxfm
+        fslmaths $atlas_roi_dir/$roi_name -bin $atlas_roi_dir/$roi_name
+    done
+done
+
+# create VTC ROI (combine inferior LOC, occipital fusiform, temporoccipital fusiform, lingual gyrus, posterior parahippocampal)
+for subj in $subjects; do
+    subj_dir=$data_dir/sub$subj
+    proc_dir=$subj_dir/proc_data
+    roi_dir=$proc_dir/anat/rois
+    atlas_roi_dir=$roi_dir/HarvardOxford
+    cd $atlas_roi_dir
+    fslmaths Lateral_Occipital_Cortex_inferior_division_L -add Lateral_Occipital_Cortex_inferior_division_R -add Occipital_Fusiform_Gyrus_L -add Occipital_Fusiform_Gyrus_R -add Parahippocampal_Gyrus_posterior_division_L -add Parahippocampal_Gyrus_posterior_division_R -add Temporal_Fusiform_Cortex_anterior_division_L -add Temporal_Fusiform_Cortex_anterior_division_R -add Temporal_Fusiform_Cortex_posterior_division_L -add Temporal_Fusiform_Cortex_posterior_division_R -add Temporal_Occipital_Fusiform_Cortex_L -add Temporal_Occipital_Fusiform_Cortex_R -bin VTC
+done
+
+
+## particular custom ROIs
+rois="42 66 3 4" # R angular gyrus, R orbitofrontal cortex, L insula, R insula. To help split larger clusters from GLM analysis
+group_dir=$data_dir/group_results/HLTP_anova/HLTP_anova.gfeat/cope1.feat
+group_map=$group_dir/thresh_zstat1_8
+for r in $rois; do
+    roi_name=$(tail -n+${r} $atlas_dir/$roi_names_file | head -1)
+    fslmaths $group_map -mas $atlas_dir/roi_${r} $group_dir/thresh_zstat1_8_$roi_name
+    fslmaths $group_dir/thresh_zstat1_8_$roi_name -abs -bin $group_dir/thresh_zstat1_8_${roi_name}_bin
+done
+for subj in $subjects; do
+    subj_dir=$data_dir/sub$subj
+    proc_dir=$subj_dir/proc_data
+    roi_dir=$proc_dir/anat/rois
+    custom_roi_dir=$roi_dir/25subs_rec-unrec_harvardoxford
+    mkdir $roi_dir; mkdir $custom_roi_dir
+    for r in $rois; do
+        roi_name=$(tail -n+${r} $atlas_dir/$roi_names_file | head -1)
+        flirt -in $group_dir/thresh_zstat1_8_${roi_name}_bin -ref $proc_dir/anat/divt1pd_brain_2mm -init $proc_dir/func/block1/block1_preproc.feat/reg/standard2highres.mat -out $custom_roi_dir/thresh_zstat1_8_$roi_name -applyxfm
+        fslmaths $custom_roi_dir/thresh_zstat1_8_$roi_name -thr .5 -bin $custom_roi_dir/thresh_zstat1_8_$roi_name
+    done
+done
+# ^ next, mask the appropriate larger clusters in 25subs_rec-unrec_clusters by these ^ to create several individual, localized clusters.
+
+
+
+
+#### cluster from group GLM
+analysis=catAnova
+group_dir=$data_dir/group_results/HLTP_$analysis/HLTP_${analysis}.gfeat/cope1.feat
+stat= # contrast of interest, e.g. zstat1 or zfstat2
+clusters=(1 2 3 4 5 6 7 8) # numbers of clusters to extract
+#roi_names=(Posterior_LOC_R Anterior_LOC_R Superior_Frontal_Gyrus_R Hippocampus_R Subcallosal_Cortex_LR Superior_Parietal_Lobule_L Hippocampus_L Mid_Posterior_Cingulate_LR Superior_Frontal_Gyrus_L Precuneus_LR Angular_Gyrus_L Medial_PFC_LR Temporal_Gyri_L Angular_Gyrus_Temporal_Gyri_R Postcentral_Gyrus_R) # custom names of each cluster
+for i in `seq ${#clusters[@]}`; do
+        c=$(echo "$i - 1" | bc)
+	clust=${clusters[$c]}
+#	roi_name=${roi_names[$c]}
+    roi_name=clust${clust}
+	for subj in $subjects; do
+            subj_dir=$data_dir/sub$subj
+            proc_dir=$subj_dir/proc_data
+            roi_dir=$proc_dir/anat/rois
+            custom_roi_dir=$roi_dir/${analysis}_clusters # note that if this is for the main rec>unrec contrast, this folder should be renamed to 25subs_rec-unrec_clusters - that is how it is labeled in other scripts.
+            mkdir $roi_dir; mkdir $custom_roi_dir; mkdir $custom_roi_dir/$stat
+	    flirt -in $group_dir/clust${clust}_mask_${stat} -ref $proc_dir/anat/divt1pd_brain_2mm -init $proc_dir/func/block1/block1_preproc.feat/reg/standard2highres.mat -out $custom_roi_dir/$stat/$roi_name -applyxfm
+	    fslmaths $custom_roi_dir/$stat/$roi_name -thr 0.5 -bin $custom_roi_dir/$stat/$roi_name # might need to make the thresholding clust / 2: $(echo "$clust / 2" | bc)
+	done
+done

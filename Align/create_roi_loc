@@ -1,0 +1,63 @@
+# inputs: Z maps from category localizer, category > others, voxel Z > ${vox_thresh}
+# aligns to 2mm iso anatomical brain and masks with ${mask} lobe mask
+
+mask=VTC_noEVC
+atlas_dir=HarvardOxford
+subjects="01 04 05 07 08 09 11 13 15 16 18 19 20 22 25 26 29 30 31 32 33 34 35 37 38"
+zstats="1 2 3 4"
+vox_thresh="2.3"
+half_thresh=$(echo "scale=4; ${vox_thresh}/2" | bc)
+data_dir= # PATH TO MAIN DATA DIRECTORY
+scripts_dir= # PATH TO SCRIPTS DIERCTORY
+
+
+## VOXEL-BASED THRESHOLDING: TAKE PARTICULAR NUMBER OF VOXELS
+# inputs: zstat maps from category localizer, category > others
+# aligns to 2mm iso anatomical brain, then mask with ${mask}
+# finally, does step-wise thresholding (starting at Z > 2.3) to get a particular number of super-threshold voxels
+# if no voxels present at beginning threshold, note it in their directory
+
+for subj in $subjects; do
+    subj_dir=$data_dir/sub$subj/proc_data
+    loc_dir=$subj_dir/func/loc/loc_categoryGLM.feat
+    brain_ref=$subj_dir/anat/divt1pd_brain_2mm
+    for z in $zstats; do
+        flirt -in $loc_dir/stats/zstat${z} -ref $brain_ref -init $loc_dir/reg/example_func2highres.mat -out $loc_dir/stats/zstat${z}_highres_2mm -applyxfm
+        fslmaths $loc_dir/stats/zstat${z}_highres_2mm -mas $subj_dir/anat/rois/${atlas_dir}/${mask} $loc_dir/zstat${z}_highres_2mm_masked${mask}
+        curr_thresh=2.3 # start testing at Z > 2.3, do not use subjects who do not survive this threshold
+        fslmaths $loc_dir/zstat${z}_highres_2mm_masked${mask} -thr $curr_thresh $loc_dir/zstat${z}_2mm_masked${mask}_Z2.3_500_voxels_highres
+        curr_voxel_count=$(fslstats $loc_dir/zstat${z}_2mm_masked${mask}_Z2.3_500_voxels_highres -V | awk '{print $1}')
+        if (( $curr_voxel_count < 100 )); then rm $loc_dir/zstat${z}_2mm_masked${mask}_Z2.3_500_voxels_highres.nii*
+        else
+            while (( $curr_voxel_count > 500 )); do
+                curr_thresh=$(echo "$curr_thresh+.1" | bc)
+                fslmaths $loc_dir/zstat${z}_highres_2mm_masked${mask} -thr $curr_thresh $loc_dir/zstat${z}_2mm_masked${mask}_Z2.3_500_voxels_highres
+                curr_voxel_count=$(fslstats $loc_dir/zstat${z}_2mm_masked${mask}_Z2.3_500_voxels_highres -V | awk '{print $1}')
+            done
+        fi
+    done
+done
+
+
+## move to anat roi folder
+for subj in $subjects; do
+    subj_dir=$data_dir/sub$subj/proc_data
+    roi_dir=$subj_dir/anat/rois/loc
+    mkdir $roi_dir
+    loc_dir=$subj_dir/func/loc/loc_categoryGLM.feat
+    for z in $zstats; do
+        fslmaths $loc_dir/zstat${z}_2mm_masked${mask}_Z2.3_500_voxels_highres -bin $roi_dir/zstat${z}_2mm_masked${mask}_Z2.3_500_voxels_highres
+    done
+done
+
+# align to standard
+for subj in $subjects; do
+    subj_dir=$data_dir/sub$subj/proc_data
+    roi_dir=$subj_dir/anat/rois/loc
+    loc_dir=$subj_dir/func/loc/loc_categoryGLM.feat
+    for z in $zstats; do
+        roi_template=zstat${z}_2mm_masked${mask}_Z2.3_500_voxels; half_thresh=0.5
+        flirt -in $roi_dir/${roi_template}_highres -ref $loc_dir/reg/standard -init $loc_dir/reg/highres2standard.mat -out $roi_dir/${roi_template}_standard -applyxfm
+        fslmaths $roi_dir/${roi_template}_standard -thr $half_thresh $roi_dir/${roi_template}_standard
+    done
+done

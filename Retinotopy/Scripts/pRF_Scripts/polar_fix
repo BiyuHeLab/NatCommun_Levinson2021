@@ -1,0 +1,16 @@
+
+
+#fixes polar angle problem
+
+#right hemisphere
+3dcalc -a std_rh_Buck.PRF_warped+orig.BRIK.niml.dset'[1]' -b std_rh_Buck.PRF_warped+orig.BRIK.niml.dset'[2]' -expr '(-atan2(a, b))' -prefix polar 
+3dcalc -a std_rh_Buck.PRF_warped+orig.BRIK.niml.dset'[10]' -expr '(a)'  -prefix VE
+3dbucket -glueto std_rh_Buck.PRF_warped+orig.BRIK.niml.dset polar.niml.dset VE.niml.dset 
+
+#left hemisphere
+3dcalc -a std_lh_Buck.PRF_warped+orig.BRIK.niml.dset'[1]' -b std_lh_Buck.PRF_warped+orig.BRIK.niml.dset'[2]' -expr '(-atan2(a, b))' -prefix polarl 
+3dcalc -a std_lh_Buck.PRF_warped+orig.BRIK.niml.dset'[10]' -expr '(a)'  -prefix VEl
+3dbucket -glueto std_lh_Buck.PRF_warped+orig.BRIK.niml.dset polarl.niml.dset VEl.niml.dset 
+
+
+

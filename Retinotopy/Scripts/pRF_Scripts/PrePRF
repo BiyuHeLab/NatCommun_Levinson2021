@@ -1,0 +1,8 @@
+#!/bin/tcsh
+
+
+3dcopy sm_5_mc_pRF_0001_ts+orig.BRIK  AFNI_pRF+orig.BRIK
+3dTstat -mean -prefix AFNI_pRFmean AFNI_pRF+orig.BRIK
+3dAutomask -prefix automask AFNI_pRF+orig.BRIK
+
+3dcalc -a AFNI_pRF+orig. -b AFNI_pRFmean+orig. -c automask+orig. -expr '100*c*(a-b)/b' -prefix PRF.scale.demean

@@ -1,0 +1,21 @@
+# paste all of this in a terminal to open SUMA for manually outlining retinotopic ROIs
+
+# manually set subject and hemisphere
+subj=16
+hemi=lh
+data_dir= # PATH TO MAIN DATA DIRECTORY
+
+# do not change the below
+cd $data_dir/sub$subj/proc_data/anat/freesurfer/sub/surf/SUMA
+suma -npb 1 -spec sub_${hemi}.spec -niml &
+
+
+# traveling bar (original dataset)
+if [ $hemi == "rh" ]; then I_RANGE="0 3.14"; else I_RANGE="-3.14 0"; fi
+DriveSuma -npb 1 -com surf_cont -view_surf_cont y -com surf_cont -load_dset std_${hemi}_Buck.PRF_warped.niml.dset -com surf_cont -switch_cmap Spectrum:red_to_blue -I_sb 14 -I_range ${I_RANGE} -T_sb 10 -T_val 0.16
+
+
+
+# wedgering (new dataset)
+if [ $hemi == "rh" ]; then I_RANGE="70 290"; else I_RANGE="260 330"; fi
+DriveSuma -npb 1 -com surf_cont -view_surf_cont y -com surf_cont -load_dset sub.sm.${hemi}.pol.field.niml.dset -com surf_cont -switch_cmap Spectrum:red_to_blue -I_sb 0 -I_range ${I_RANGE} -T_sb 2 -T_val 5

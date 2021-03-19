@@ -1,0 +1,44 @@
+#!/bin/tcsh
+
+#This script creates functional BRIKs
+#Dimon organized DICOM files run by run
+#3dTshift shifts voxel time series from the input dataset so that the separate slices are aligned to the same temporal origin; output dataset time series is interpolated from the input to the new temporal grad; want to disgard the "dummy" runs [8...155] (this will only take slices from TR 8 - 156 (afni counting starts at 0))
+# dummies are automatically removed on 3T; here, only need to chop off last 5 TRs of post-baseline
+
+source omniVariables
+
+mkdir $origBRIKDir
+3dcopy $subDir/proc_data/anat/divt1pd.nii* $origBRIKDir/anat+orig
+mkdir $timeDir
+
+# below commented out because AFNI files have already been generated
+# set dicomDir = $participantDir/Dicom
+# set typeIndex = 1
+# echo 1
+
+# foreach anal ($runTypes)
+#     set runType = $runTypes[$typeIndex]
+#     echo $runType
+
+#         set runs = ($pRF) #include the types of runs as set in the omniVariables file ($----study-----Runs)
+
+
+
+#     echo $typeIndex
+#     echo $runs
+
+#     foreach run ($runs)
+#         set dataDir = $dicomDir/${firstRun}
+#         cd $dataDir
+ 
+#             Dimon -infile_pre '*.IMA' -sort_by_num_suffix -gert_outdir ${origBRIKDir} -gert_to3d_prefix ${runType}_${run} -GERT_Reco -quit -gert_create_dataset
+#             3dTshift -tzero 0 -heptic -prefix ${timeDir}/${runType}_${run}_${timeExt} $origBRIKDir/${runType}_${run}+orig.HEAD'[0..191]'
+
+ 
+#     end
+
+#     set typeIndex = `expr $typeIndex + 1`
+# end
+cd $scriptsDir
+
+

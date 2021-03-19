@@ -1,0 +1,29 @@
+setenv AFNI_CONVMODEL_REF conv.ref.GAM.1D
+setenv AFNI_MODEL_PRF_STIM_DSET Masks+orig.BRIK	
+setenv AFNI_MODEL_PRF_ON_GRID YES
+
+setenv AFNI_MODEL_DEBUG 2
+
+# set path = (/Users/silsoneh/bin /usr/X11R6/bin /bin /usr/bin /sbin /usr/sbin /usr/local/bin /sw/bin . )
+
+# 3dNLfim -input PRF.scale.demean+orig.	\
+ #	-mask automask+orig.	\
+
+#which 3dNLfim
+
+
+#set infile = 086*D
+3dNLfim -input PRF.scale.demean+orig. \
+	-mask automask+orig.	\
+	-noise Zero		\
+	-signal Conv_PRF	\
+	-sconstr 0 -10.0 10.0	\
+	-sconstr 1 -1.0 1.0	\
+	-sconstr 2 -1.0 1.0	\
+	-sconstr 3 0.0 1.0	\
+	-BOTH			\
+	-nrand 10000		\
+	-nbest 5		\
+	-bucket 0 Buck.PRF	\
+	-snfit snfit.PRF
+

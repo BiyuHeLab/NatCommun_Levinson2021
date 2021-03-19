@@ -1,0 +1,29 @@
+#!/bin/tcsh
+
+#This script corrects motion problems; takes specified first run and sets as base, then registers each 3D sub-brick from the input dataset to the base brick 
+
+source omniVariables
+
+mkdir $motionDir
+
+set baseRun =  ${timeDir}/*${runTypes}*_${timeExt}*.HEAD
+set typeIndex = 1
+foreach anal ($runTypes)
+    set runType = $runTypes[$typeIndex]
+    set datasets = ($timeDir/${runType}_*_${timeExt}+orig.HEAD)
+
+    foreach dataset ($datasets)
+		set input = $dataset:r
+		set filename = $input:t
+		
+		3dvolreg -verbose \
+        -base ${baseRun}'[0]' \
+		-maxite 25 \
+        -prefix $motionDir/${motionExt}_${filename} \
+        -dfile $motionDir/${filename}_motion \
+        ${input}
+	end
+   
+	set typeIndex = `expr $typeIndex + 1`
+end
+

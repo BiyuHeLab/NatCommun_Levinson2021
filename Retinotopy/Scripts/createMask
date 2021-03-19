@@ -1,0 +1,16 @@
+#!/bin/tcsh
+
+source omniVariables
+
+mkdir $maskDir
+
+set input = ${motionDir}/${motionExt}_${runTypes}_${pRF}_${timeExt}*.HEAD
+
+3dAutomask \
+	-prefix ${maskDir}/brainMask \
+	$input
+
+
+
+
+

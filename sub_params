@@ -1,0 +1,68 @@
+#Template for analysis parameters. Edit per subject as needed.
+#Day 1 session-specific details
+d3locscan=true
+b1mapscan=true
+t1scan=true
+pdscan=true
+restscan=true
+locscan=true
+prfscan=true
+wedge_cwscan=true
+wedge_ccwscan=true
+ring_conscan=true
+ring_expscan=true
+diffscan=true
+visual_rois="rhV1 rhV2v rhV2d rhV3v rhV3d rhV4 lhV1 lhV2v lhV2d lhV3v lhV3d lhV4"
+loc_rois="zstat1 zstat2 zstat3 zstat4"
+
+d3locrun="0001"
+b1maprun="0002"
+t1run="0003"
+pdrun="0004"
+restrun="0021"
+locrun="0020"
+prfrun="0015"
+wedge_cwrun="0016"
+wedge_ccwrun="0017"
+ring_conrun="0018"
+ring_exprun="0019"
+diffruns="0005 0006 0007 0008 0009 0010 0011 0012 0013 0014"
+
+
+#Day 2 session-specific details
+
+d3loc2scan=true
+b1map2scan=true
+rest2scan=true
+
+d3loc2run="0001"
+b1map2run="0002"
+rest2run="0018"
+taskruns="0003 0004 0005 0006 0007 0008 0009 0010 0011 0012 0013 0014 0015 0016 0017"
+
+#edit this to define which runs will be used for analysis
+good_blocks="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
+bad_blocks=""
+
+
+## analysis parameters to change from defaults, when needed
+## uncomment and set value when needed
+## see 'analysis_parameters' file for descriptions of parameters
+#f=
+#g=
+#s=
+#min_pd=
+
+
+### nonchanging parameters
+
+#day1
+all_runs="d3loc b1map t1 pd rest loc prf wedge_cw wedge_ccw ring_con ring_exp"
+anat_runs="t1 pd"
+func_runs="rest loc wedge_cw wedge_ccw ring_con ring_exp"
+ret_seqs="wedge_cw wedge_ccw ring_con ring_exp"
+
+#day2
+nontask_runs="d3loc2 b1map2 rest2"
+runsarray_tmp=($taskruns)
+num_runs=${#runsarray_tmp[@]}

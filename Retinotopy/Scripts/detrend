@@ -1,0 +1,51 @@
+#!/bin/tcsh
+source omniVariables
+
+#This script detrends the data 
+#3dTstat computes one or more voxel-wise statistics for a 3D+time dataset and stores them in a bucket dataset 
+#3dDetrend removes components from voxel time series using linear least squares—each voxel treated independently; —vector ‘filename[1,…,n] will remove columns 1-n in file; —polort adds Legendre polynomials of order up to and including specified number in the list of vectors to remove 
+#3dcalc does voxel-by-voxel arithmetic on 3D datasets; the program assumes that the voxel-by-voxel computations are being performed on datasets that occupy the same space and have the same orientations
+
+mkdir $detrendDir
+
+set typeIndex = 1
+foreach anal ($runTypes)
+    set runType = $runTypes[$typeIndex]
+	set datasets = ($motionDir/${motionExt}_${runType}_*_ts+orig.HEAD)
+	set motionsets = ($motionDir/${runType}_*_motion)
+	
+	echo $datasets
+	echo $motionsets
+	
+	set setIndex = 1
+	foreach dataset ($datasets)
+		set input = $dataset:r
+		set filename = $input:t
+		set motionname = $motionsets[$setIndex]
+		
+		echo $filename
+		echo $motionname
+		
+		set setIndex = `expr $setIndex + 1`
+		
+		3dTstat \
+			-prefix $detrendDir/Mean_${filename} \
+			$input
+		
+		3dDetrend \
+			-prefix $detrendDir/tempDetrend \
+			-vector $motionname'[1,2,3,4,5]' \
+			-polorrt 2 \
+			${input}
+	
+		3dcalc \
+			-a $detrendDir/tempDetrend+orig \
+			-b $detrendDir/Mean_${filename} \
+			-expr "(a+b)" \
+			-float \
+			-prefix $detrendDir/${detrendExt}_${filename}
+
+		rm $detrendDir/tempDetrend*
+	end
+    set typeIndex = `expr $typeIndex + 1`
+end

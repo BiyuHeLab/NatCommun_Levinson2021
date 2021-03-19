@@ -1,0 +1,29 @@
+#!/bin/tcsh
+
+#omniVariables should be set with subject's initials
+
+set scriptsDir=`pwd` # this script is called during preprocessing, when current directory = scripts directory
+
+##preprocessing
+tcsh createBRIK #turns raw Dicoms into Brik files (AFNI format)
+tcsh motionCorrect #motion corrects each volume to 1st volume
+tcsh detrend #removes linear trends such as scanner drift
+tcsh smoothing #smooths data by FWHM specified in omniVariables
+tcsh createAnalysis #creates directory structure
+tcsh createMask #makes brain mask to increase computation speed
+tcsh singlerunPRF #copies smoothed and unsmoothed data to pRF folder
+
+##prepare data for pRF model
+source ${scriptsDir}/omniVariables
+cp ${scriptsDir}/pRF_Scripts/PrePRF ${participantDir}/pRF/Results/
+cd ${participantDir}/pRF/Results
+tcsh PrePRF
+
+##run pRF model
+cp -a ${scriptsDir}/pRF_Scripts/. ${participantDir}/pRF/Results/
+tcsh run_AFNIpRF #about 15 min for 7T
+tcsh polarData #creates eccentricity and polar angle data
+
+##run surface reconstruction
+cd ${scriptsDir}
+tcsh surface_HLTP_all

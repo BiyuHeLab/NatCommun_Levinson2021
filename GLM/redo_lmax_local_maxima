@@ -1,0 +1,11 @@
+# some commands to compute more local maxima for each cluster, for better identification of subregions of large clusters
+
+fslmaths stats/zstat1 -mas mask tmp_thresh_zstat1
+cluster -i tmp_thresh_zstat1 -t 3.1 --othresh=tmp_thresh_zstat1 -o tmp_cluster_mask_zstat1 --connectivity=26 --mm --olmax=lmax_zstat1_std_12points.txt -n 12 --scalarname=Z -p 0.05 -d 0.271104 --volume=154982 -c stats/cope1 > tmp_cluster_zstat1_std.txt
+
+rm tmp_*zstat1*
+
+fslmaths stats/zstat8 -mas mask tmp_thresh_zstat8
+cluster -i tmp_thresh_zstat8 -t 3.1 --othresh=tmp_thresh_zstat8 -o tmp_cluster_mask_zstat8 --connectivity=26 --mm --olmax=lmax_zstat8_std_12points.txt -n 12 --scalarname=Z -p 0.05 -d 0.271104 --volume=154982 -c stats/cope8 > tmp_cluster_zstat8_std.txt
+
+rm tmp_*zstat8*

@@ -1,0 +1,40 @@
+#!/bin/tcsh
+#$ -S /bin/tcsh
+#$ -cwd
+#module load freesurfer
+#module load afni
+
+# Set up subject directory
+set SCRIPTS_DIR = `pwd`
+source ${SCRIPTS_DIR}/omniVariables
+
+tcsh -c  ${SCRIPTS_DIR}/alignAnatToFunc
+
+
+# anatomical file and subject id
+set anatfn=  anat
+set subjid = sub
+
+# convert from AFNI to NIFTI
+#3dcopy -overwrite ${anatfn}+orig ${anatfn}.nii
+
+# convert from NIFTI to MGH
+#mri_convert ${anatfn}.nii ${anatfn}.mgh
+
+# Set up subject directory
+set SUBJECTS_DIR = $subDir/proc_data/anat/freesurfer #`pwd`
+
+# start re construction
+#recon-all -subject ${subjid} -i ${anatfn}.mgh -all -cw256 -T2 ../../../anat/flash.mgz -T2pial # done in earlier preprocessing now
+
+# transform to SUMA
+
+cd $SUBJECTS_DIR/${subjid}/surf
+
+@SUMA_Make_Spec_FS -sid ${subjid} -no_ld
+
+cd $SCRIPTS_DIR
+tcsh alignAnatandFuncToSuma
+cp pRF_Scripts/polar_fix $SUBJECTS_DIR/${subjid}/surf/SUMA/polar_fix
+cd $SUBJECTS_DIR/${subjid}/surf/SUMA
+sh polar_fix

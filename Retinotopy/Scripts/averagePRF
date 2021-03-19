@@ -1,0 +1,29 @@
+#!/bin/tcsh
+
+source omniVariables
+
+set typeIndex = 1
+foreach runIndex ($runTypes)
+	set runType = $runTypes[$typeIndex]
+	set resultsDir = ${participantDir}/${runType}/Results
+	set runs = $pRF # make these the names of the runsCat as set in 	omniVariables
+    echo $runs
+
+	echo ${motionDir}/${runType}_${pRF}_'ts+orig'_motion
+	cat ${motionDir}/${runType}_${pRF}*motion > ${motionDir}/${runType}Motion	
+	
+	1dplot -volreg -xlabel ${runType}_Motion ${motionDir}/${runType}Motion'[1..6]'
+	
+	
+	set datasetsRaw = (${detrendDir}/${detrendExt}_${motionExt}_${runType}_{$runs}*.HEAD)
+	set datasetsSmooth = (${smoothDir}/${smoothExt}_${motionExt}_${runType}_{$runs}_ts+orig*.HEAD)
+		
+	echo $datasetsRaw
+	echo $datasetsSmooth
+		
+	cp $datasetsRaw[1]    ${resultsDir}/timeseries
+	cp $datasetsSmooth[1]    ${resultsDir}/${smoothExt}_timeseries
+	
+
+end
+

@@ -1,0 +1,17 @@
+#!/bin/tsch
+
+source omniVariables
+
+set typeIndex = 1
+
+foreach anal ($runTypes)
+	set runType = $runTypes[$typeIndex]
+	echo $runType
+	
+	1dplot -volreg -xlabel ${runType}Motion ${motionDir}/${runType}Motion'[1..6]'
+
+	set typeIndex = `expr $typeIndex + 1`
+	echo $typeIndex 
+end
+
+

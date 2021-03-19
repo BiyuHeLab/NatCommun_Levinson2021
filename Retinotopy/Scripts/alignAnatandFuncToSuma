@@ -1,0 +1,44 @@
+#!/bin/tcsh
+
+source omniVariables
+
+set ExpAnat = anat_ns_al2epi+orig.
+set subj = sub
+
+set SUMADir = $participantDir/../../anat/freesurfer/$subj/surf/SUMA
+set HemNames = (lh rh)
+
+######### Align Anat to SUMA #################################
+
+cd ${alignDir}
+
+@SUMA_AlignToExperiment -wd -exp_anat ${ExpAnat} -surf_anat $SUMADir/${subj}_SurfVol+orig. -align_centers -strip_skull surf_anat \
+    -prefix ${subj}_SurfVol_acor_ns_centre_AInd_Exp
+
+cp -R ${alignDir}/${subj}_SurfVol_acor_ns_centre_AInd_Exp* ${SUMADir}/
+
+#3dVol2Surf_3#################################
+
+cd ${SUMADir}
+ 
+set typeIndex = 1
+foreach anal ($runTypes)
+	set runType = $runTypes
+    	echo $runType
+	if ( $typeIndex == 1) then
+			foreach hemi (lh rh)
+				3dVol2Surf -spec ${subj}_${hemi}.spec	\
+				-surf_A ${hemi}.smoothwm.asc   \
+				-surf_B ${hemi}.pial.asc     	  \
+				-sv ${subj}_SurfVol_acor_ns_centre_AInd_Exp+orig  	\
+				-grid_parent $participantDir/${runType}/Results/Buck.PRF_warped+orig.BRIK						\
+				-oob_value 0									\
+				-map_func ave -f_steps 10 -f_index nodes -out_niml std_${hemi}_Buck.PRF_warped+orig.BRIK.niml.dset 
+			end
+
+			
+	endif
+	set typeIndex = `expr $typeIndex + 1`	
+end
+
+	

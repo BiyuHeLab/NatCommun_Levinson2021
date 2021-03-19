@@ -1,0 +1,6 @@
+# FSL anatomical analysis parameters
+f=0.5 #fractional intensity threshold for 'bet' skull-stripping. Smaller value: larger brain estimate
+g=0.18 #vertical gradient threshold. Larger value: more brain at bottom, less at top
+s=0.2 #smoothing for PD image
+min_pd=1 #remove voxels with lower intensity from PD image, to prevent large voxel values in t1/pd image
+pd_mask_threshold=100 #exclude voxels with lower intensity when creating mask of PD brain

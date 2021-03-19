@@ -1,0 +1,12 @@
+#!/bin/tcsh
+
+source omniVariables
+
+set analyses = ($runTypes)
+
+foreach analName ($analyses)
+	mkdir $participantDir/$analName
+	
+	mkdir $participantDir/$analName/Results
+
+end

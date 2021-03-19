@@ -1,0 +1,11 @@
+################################################################################# calculate eccentricity and polar angle measurements and append to buck.PRF subbriks #13 and # 14 respectively.
+################################################################################
+
+3dcalc -a Buck.PRF+orig'[1]' -b Buck.PRF+orig'[2]' -expr 'sqrt(a^2+b^2)' -prefix polor.mag
+3dcalc -a Buck.PRF+orig.'[1]' -b Buck.PRF+orig.'[2]' -expr 'atan2(-b,a)' -prefix polor.phase
+
+3dbucket -glueto Buck.PRF+orig.  polor.mag+orig.  polor.phase+orig.
+
+################################################################################
+
+

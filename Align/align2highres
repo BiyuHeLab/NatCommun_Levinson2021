@@ -1,0 +1,39 @@
+# Parameters
+scripts_dir= # PATH TO SCRIPTS DIRECTORY
+. $scripts_dir/directories # point to location of "directories" file
+. $scripts_dir/analysis_parameters
+subjects="01 04 05 07 08 09 11 13 15 16 18 19 20 22 25 26 29 30 31 32 33 34 35 37 38"
+
+
+## align denoised data to subject highres
+
+for subj in $subjects; do
+    subj_dir="$data_dir/sub$subj"
+    func_dir="$subj_dir/proc_data/func"
+    . $subj_dir/sub_params
+    for block in $good_blocks; do
+        cd $func_dir/block${block}/block${block}_preproc.feat
+        flirt -in denoised_data -ref reg/highres -init reg/example_func2highres.mat -out denoised_data2highres -applyisoxfm 2 # 2mm isotropic anatomical space.
+    done
+done
+
+
+
+## align GLM betas to subject highres
+
+# Parameters
+glm="conditions" # GLM .feat directory name
+pes="1 3 5 7 9 11 13 15" # which beta values to align (odd numbers only; even numbers are temporal derivatives)
+
+for subj in $subjects; do
+    subj_dir="$data_dir/sub$subj"
+    func_dir="$subj_dir/proc_data/func"
+    . $subj_dir/sub_params
+    for block in $good_blocks; do
+        cd $func_dir/block${block}/${glm}GLM.feat/stats
+        for pe in $pes; do
+            flirt -in pe${pe} -ref ../reg/highres -init ../reg/example_func2highres.mat -out pe${pe}_2highres -applyisoxfm 2
+            gunzip pe${pe}_2highres.nii.gz
+        done
+    done
+done

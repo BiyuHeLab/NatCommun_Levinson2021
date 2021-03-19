@@ -1,0 +1,38 @@
+#!/bin/tcsh
+
+source omniVariables
+
+set firstFunc = pRF
+set anatName = anat
+
+mkdir $alignDir
+
+# Deoblique for each exp ##############################
+echo 1
+set typeIndex = 1
+foreach anal ($runTypes)
+    	set runType = $runTypes[$typeIndex]
+    	echo $runType
+	if ($typeIndex == 1) then
+    		3dWarp -prefix ../${runType}/Results/Buck.PRF_warped+orig -deoblique ../${runType}/Results/Buck.PRF+orig
+	endif
+
+    	set typeIndex = `expr $typeIndex + 1`
+end
+
+
+#deoblique first run #############################
+
+3dWarp -prefix $alignDir/${firstFunc}_mc_warped+orig -deoblique $motionDir/mc_${firstFunc}_${pRF}_ts+orig
+
+#Strip Skull####################################
+
+3dSkullStrip -input ${origBRIKDir}/${anatName}+orig -use_skull -prefix ${alignDir}/${anatName}_ns 
+rm skull_strip_out_hull.ply 
+
+cd ../Scripts
+
+#Align anat to epi##############################
+cd $alignDir 
+
+align_epi_anat.py -anat ${anatName}_ns+orig -anat_has_skull no -epi ${firstFunc}_mc_warped+orig -epi_strip 3dAutomask -cost lpc+ZZ -multi_cost nmi lpa -suffix _al2epi -epi_base 0 -prep_off

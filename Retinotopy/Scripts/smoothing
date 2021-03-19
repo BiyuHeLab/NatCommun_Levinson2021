@@ -1,0 +1,30 @@
+#!/bin/tcsh
+source omniVariables
+
+mkdir $smoothDir
+
+set typeIndex = 1
+
+foreach anal ($runTypes)
+	set runType = $runTypes[$typeIndex]
+	if ($typeIndex == 1) then
+        	set datasets = ($motionDir/mc_${runType}_*_ts+orig.HEAD)
+	else if ($typeIndex == 2) then
+		set datasets = ($detrendDir/detrend_mc_${runType}_*_ts+orig.HEAD)
+	else if ($typeIndex == 3) then
+		set datasets = ($detrendDir/detrend_mc_${runType}_*_ts+orig.HEAD)	
+	endif
+	
+	echo $datasets
+
+	foreach dataset ($datasets)
+		set input = $dataset:r
+		set filename = $input:t	
+		
+		3dmerge -1blur_fwhm $fwhm \
+	    	-doall \
+		    -prefix $smoothDir/${smoothExt}_${filename} \
+			${dataset}
+	end
+	set typeIndex = `expr $typeIndex + 1`
+end

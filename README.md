@@ -45,3 +45,4 @@ code to analyze the data.
 fslmaths group_avg.nii -thr TFCE_critical_stat group_avg_thresholded.nii
 ```
 3. In MATLAB, edit and run MVPA_stats/HLTP_groupMVPA_stats_ROI.m to perform statistics on ROI-based analyses.
+4. In R, run MVPA_stats/lmm_decoding.R to reproduce the linear mixed model summarized in Table S3.

@@ -1,5 +1,5 @@
 # Levinson & Podvalny et al., 2021, Nature Communications
-## Large-scale cortical and subcortical signatures of conscious object recognition
+## Cortical and subcortical signatures of conscious object recognition
 &nbsp;  
 
 ## Contents
